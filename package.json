@@ -70,11 +70,15 @@
     "foundation-sites": "^6.3.0-rc1",
     "hammerjs": "^2.0.8",
     "imagemin-mozjpeg": "^6.0.0",
-    "normalize-scss": "^6.0.0",    
+    "normalize-scss": "^6.0.0",
     "imagemin-pngquant": "^5.0.1",
     "lodash": "^4.16.4",
     "react": "^15.6.1",
     "react-dom": "^15.5.4",
+    "react-redux": "^5.0.5",
+    "redux": "^3.6.0",
+    "redux-thunk": "^2.2.0",
+    "reselect": "^3.0.1",
     "sass-lint": "^1.12.1"
   }
 }

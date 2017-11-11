@@ -73,4 +73,9 @@ typings/
 !.vscode/extensions.json
 .history
 
+# output and sourcemaps
+*.js.map
+*.css.map
+./dist/**/*.css
+
 # End of https://www.gitignore.io/api/git,node,visualstudiocode

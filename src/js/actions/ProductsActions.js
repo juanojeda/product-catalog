@@ -3,7 +3,7 @@ export const RECEIVE_PRODUCTS = 'RECEIVE_PRODUCTS';
 export const LOADING_PRODUCTS = 'LOADING_PRODUCTS';
 export const ERROR_FOR_PRODUCTS = 'ERROR_FOR_PRODUCTS';
 
-const PRODUCTS_FEED_URL = '/data/products.json';
+const PRODUCTS_FEED_URL = 'data/products.json';
 
 export const setProductsLoading = () => {
   return {

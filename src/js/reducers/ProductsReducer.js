@@ -3,7 +3,7 @@ import { assign } from 'lodash';
 import { FETCH_PRODUCTS, RECEIVE_PRODUCTS, ERROR_FOR_PRODUCTS } from '../actions/ProductsActions';
 
 const initialState = {
-  loading: false,
+  isLoading: false,
   products: [],
   error: {
     isError: false,
@@ -15,14 +15,14 @@ const ProductsReducer = (state = initialState, action) => {
   switch(action.type) {
     case FETCH_PRODUCTS: {
       return assign({}, state, {
-        loading: true,
+        isLoading: true,
         error: {...initialState.error}
       });
     }
 
     case RECEIVE_PRODUCTS: {
       return assign({}, state, {
-        loading: false,
+        isLoading: false,
         products: action.products,
         error: {...initialState.error}
       });
@@ -35,7 +35,7 @@ const ProductsReducer = (state = initialState, action) => {
       };
 
       return assign({}, state, {
-        loading: false,
+        isLoading: false,
         error: errorPacket,
       });
     }

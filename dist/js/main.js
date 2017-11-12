@@ -10939,6 +10939,8 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -10954,8 +10956,13 @@ var ProductCatalog = function (_Component) {
     var _this = _possibleConstructorReturn(this, (ProductCatalog.__proto__ || Object.getPrototypeOf(ProductCatalog)).call(this, props));
 
     _this.state = {
-      selectedFilter: null
+      isLoading: true,
+      selectedFilter: null,
+      filters: [],
+      products: []
     };
+
+    _this.setSelectedFilterSize = _this.setSelectedFilterSize.bind(_this);
     return _this;
   }
 
@@ -10966,6 +10973,48 @@ var ProductCatalog = function (_Component) {
 
 
       actions.fetchProducts();
+    }
+  }, {
+    key: 'componentWillUpdate',
+    value: function componentWillUpdate(nextProps, nextState) {
+
+      var isProductsLoaded = !(0, _lodash.isEqual)(this.props.productsState, nextProps.productsState);
+      var isFilterUpdated = !(0, _lodash.isEqual)(this.state.selectedFilter, nextState.selectedFilter);
+
+      if (isProductsLoaded || isFilterUpdated) {
+        this.setState({
+          isLoading: nextProps.productsState.isLoading,
+          filters: this.getFiltersFromProductsFeed(nextProps.productsState.products),
+          products: this.getProductsBySize(nextProps.productsState.products, nextState.selectedFilter)
+        });
+      }
+    }
+  }, {
+    key: 'getProductsBySize',
+    value: function getProductsBySize(products, size) {
+      var filteredProducts = [].concat(_toConsumableArray(products));
+
+      if (size !== null) {
+        filteredProducts = (0, _lodash.filter)(products, function (product) {
+          return product.size.indexOf(size) !== -1;
+        });
+      }
+
+      return filteredProducts;
+    }
+  }, {
+    key: 'getFiltersFromProductsFeed',
+    value: function getFiltersFromProductsFeed(products) {
+      var filters = (0, _lodash.uniq)((0, _lodash.flatten)((0, _lodash.map)(products, 'size')));
+
+      return filters;
+    }
+  }, {
+    key: 'setSelectedFilterSize',
+    value: function setSelectedFilterSize(size) {
+      this.setState({
+        selectedFilter: size
+      });
     }
   }, {
     key: 'render',
@@ -10984,9 +11033,23 @@ var ProductCatalog = function (_Component) {
             null,
             categoryTitle
           ),
-          _react2.default.createElement(_ProductFilters2.default, { filters: [{ name: 's' }, { name: 'm' }, { name: 'l' }] })
+          _react2.default.createElement(_ProductFilters2.default, { onChangeHandler: this.setSelectedFilterSize, filters: this.state.filters })
         ),
-        _react2.default.createElement('div', { className: 'catalog__product-list' })
+        this.state.isLoading ? _react2.default.createElement(
+          'div',
+          { className: 'loading' },
+          'Loading ...'
+        ) : _react2.default.createElement(
+          'div',
+          { className: 'catalog__product-list' },
+          this.state.products.map(function (product) {
+            return _react2.default.createElement(
+              'div',
+              { key: product.index },
+              product.productName
+            );
+          })
+        )
       );
     }
   }]);
@@ -11000,11 +11063,11 @@ ProductCatalog.propTypes = {
 
 function mapStateToProps(state) {
   return {
-    products: state.products
+    productsState: state.ProductsReducer
   };
 }
 
-function mapDispatchToProps(dispatch, ownProps) {
+function mapDispatchToProps(dispatch) {
   return {
     actions: (0, _redux.bindActionCreators)((0, _lodash.assign)({}, ProductActions), dispatch)
   };
@@ -11125,13 +11188,31 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var ProductFilters = function (_Component) {
   _inherits(ProductFilters, _Component);
 
-  function ProductFilters() {
+  function ProductFilters(props) {
     _classCallCheck(this, ProductFilters);
 
-    return _possibleConstructorReturn(this, (ProductFilters.__proto__ || Object.getPrototypeOf(ProductFilters)).apply(this, arguments));
+    var _this = _possibleConstructorReturn(this, (ProductFilters.__proto__ || Object.getPrototypeOf(ProductFilters)).call(this, props));
+
+    _this.state = {
+      selectedFilter: null
+    };
+
+    _this.setSelectedFilter = _this.setSelectedFilter.bind(_this);
+    return _this;
   }
 
   _createClass(ProductFilters, [{
+    key: 'setSelectedFilter',
+    value: function setSelectedFilter(event) {
+      var filter = null;
+
+      if (event.target.value !== '') {
+        filter = event.target.value;
+      }
+
+      this.props.onChangeHandler(filter);
+    }
+  }, {
     key: 'render',
     value: function render() {
       var filters = this.props.filters;
@@ -11142,12 +11223,19 @@ var ProductFilters = function (_Component) {
         { className: 'header__filters' },
         _react2.default.createElement(
           'select',
-          { name: 'productFilters', id: 'productFilters' },
+          { onChange: this.setSelectedFilter, name: 'productFilters', id: 'productFilters' },
+          _react2.default.createElement(
+            'option',
+            { value: '' },
+            'Filter by size'
+          ),
+
+          /*TODO: Filter so that sizes come out ordered logically*/
           filters.map(function (filter) {
             return _react2.default.createElement(
               'option',
-              { key: filter.name },
-              filter.name
+              { value: filter, key: filter },
+              filter
             );
           })
         )
@@ -11159,7 +11247,8 @@ var ProductFilters = function (_Component) {
 }(_react.Component);
 
 ProductFilters.propTypes = {
-  filters: _propTypes2.default.array.isRequired
+  filters: _propTypes2.default.array.isRequired,
+  onChangeHandler: _propTypes2.default.func.isRequired
 };
 
 exports.default = ProductFilters;
@@ -11182,7 +11271,7 @@ var _lodash = __webpack_require__(36);
 var _ProductsActions = __webpack_require__(58);
 
 var initialState = {
-  loading: false,
+  isLoading: false,
   products: [],
   error: {
     isError: false,
@@ -11198,7 +11287,7 @@ var ProductsReducer = function ProductsReducer() {
     case _ProductsActions.FETCH_PRODUCTS:
       {
         return (0, _lodash.assign)({}, state, {
-          loading: true,
+          isLoading: true,
           error: _extends({}, initialState.error)
         });
       }
@@ -11206,7 +11295,7 @@ var ProductsReducer = function ProductsReducer() {
     case _ProductsActions.RECEIVE_PRODUCTS:
       {
         return (0, _lodash.assign)({}, state, {
-          loading: false,
+          isLoading: false,
           products: action.products,
           error: _extends({}, initialState.error)
         });
@@ -11220,7 +11309,7 @@ var ProductsReducer = function ProductsReducer() {
         };
 
         return (0, _lodash.assign)({}, state, {
-          loading: false,
+          isLoading: false,
           error: errorPacket
         });
       }

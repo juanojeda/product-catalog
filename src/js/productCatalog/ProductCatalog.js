@@ -3,7 +3,7 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
 import PropTypes from 'prop-types';
-import { assign } from 'lodash';
+import { assign, isEqual, filter, uniq, map, flatten } from 'lodash';
 
 import * as ProductActions from '../actions/ProductsActions';
 
@@ -15,35 +15,86 @@ class ProductCatalog extends Component {
     super(props);
 
     this.state = {
+      isLoading: true,
       selectedFilter: null,
+      filters: [],
+      products: []
     };
-  }
 
+    this.setSelectedFilterSize = this.setSelectedFilterSize.bind(this);
+  }
 
   componentWillMount() {
     const { actions } = this.props;
 
     actions.fetchProducts();
+
   }
 
+  componentWillUpdate(nextProps, nextState) {
+
+    const isProductsLoaded = !isEqual(this.props.productsState, nextProps.productsState);
+    const isFilterUpdated = !isEqual(this.state.selectedFilter, nextState.selectedFilter);
+
+    if (isProductsLoaded || isFilterUpdated){
+      this.setState({
+        isLoading: nextProps.productsState.isLoading,
+        filters: this.getFiltersFromProductsFeed(nextProps.productsState.products),
+        products: this.getProductsBySize(nextProps.productsState.products, nextState.selectedFilter)
+      });
+    }
+  }
+
+  getProductsBySize(products, size) {
+    let filteredProducts = [...products];
+
+    if(size !== null) {
+      filteredProducts = filter(products, (product) => {
+        return product.size.indexOf(size) !== -1;
+      });
+    }
+
+    return filteredProducts;
+  }
+
+  getFiltersFromProductsFeed(products){
+    const filters = uniq(flatten(map(products, 'size')));
+
+    return filters;
+  }
+
+  setSelectedFilterSize(size) {
+    this.setState({
+      selectedFilter: size
+    });
+  }
 
   render() {
-
     const {categoryTitle} = this.props;
 
     return (
-      <div className="catalog container">
+      <div className='catalog container'>
 
-        <div className="catalog__header">
+        <div className='catalog__header'>
           <h2>{categoryTitle}</h2>
 
-          <ProductFilters filters={[{name: 's'}, {name: 'm'}, {name: 'l'}]} />
+          <ProductFilters onChangeHandler={this.setSelectedFilterSize} filters={this.state.filters} />
         </div>
 
-        <div className="catalog__product-list">
-
-        </div>
-
+        {
+          this.state.isLoading ?
+            <div className='loading'>Loading ...</div>
+          :
+            <div className='catalog__product-list'>
+              {
+                this.state.products.map((product) => {
+                  return (
+                    <div key={product.index}>{product.productName}</div>
+                  );
+                })
+              }
+            </div>
+        }
       </div>
     );
   }
@@ -55,11 +106,11 @@ ProductCatalog.propTypes = {
 
 function mapStateToProps (state) {
   return {
-    products: state.products
+    productsState: state.ProductsReducer
   };
 }
 
-function mapDispatchToProps (dispatch, ownProps) {
+function mapDispatchToProps (dispatch) {
   return {
     actions: bindActionCreators(assign({}, ProductActions), dispatch)
   };

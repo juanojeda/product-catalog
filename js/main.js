@@ -6448,7 +6448,7 @@ var RECEIVE_PRODUCTS = exports.RECEIVE_PRODUCTS = 'RECEIVE_PRODUCTS';
 var LOADING_PRODUCTS = exports.LOADING_PRODUCTS = 'LOADING_PRODUCTS';
 var ERROR_FOR_PRODUCTS = exports.ERROR_FOR_PRODUCTS = 'ERROR_FOR_PRODUCTS';
 
-var PRODUCTS_FEED_URL = '/data/products.json';
+var PRODUCTS_FEED_URL = 'data/products.json';
 
 var setProductsLoading = exports.setProductsLoading = function setProductsLoading() {
   return {

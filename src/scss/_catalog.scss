@@ -24,7 +24,7 @@
     flex-wrap: wrap;
   }
 
-  @include bp(medium){
+  @include bp(medium) {
     &__filters {
       select {
         padding: initial;

@@ -15,6 +15,7 @@ class ProductItem extends Component {
     return (
       <div className="product-item">
         <div className="product-item__image-container">
+          {/*TODO: preload images */}
           <img src={`./images/${productImage}`} className="product-item__image" />
         </div>
 

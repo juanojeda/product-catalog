@@ -1,5 +1,12 @@
-@import 'normalize-scss/sass/normalize';
 @import './variables';
+@import './mixins';
+
+@import './catalog';
+@import './product-item';
+
+* {
+  box-sizing: border-box;
+}
 
 html {
   background: $background;

@@ -8,6 +8,7 @@ import { assign, isEqual, filter, uniq, map, flatten } from 'lodash';
 import * as ProductActions from '../actions/ProductsActions';
 
 import ProductFilters from './ProductFilters';
+import ProductItem from './ProductItem';
 
 class ProductCatalog extends Component {
 
@@ -73,23 +74,23 @@ class ProductCatalog extends Component {
     const {categoryTitle} = this.props;
 
     return (
-      <div className='catalog container'>
+      <div className="catalog container">
 
-        <div className='catalog__header'>
-          <h2>{categoryTitle}</h2>
+        <div className="catalog__header">
+          <h2 className="catalog__header-text">{categoryTitle}</h2>
 
           <ProductFilters onChangeHandler={this.setSelectedFilterSize} filters={this.state.filters} />
         </div>
 
         {
           this.state.isLoading ?
-            <div className='loading'>Loading ...</div>
+            <div className="loading">Loading ...</div>
           :
-            <div className='catalog__product-list'>
+            <div className="catalog__product-list">
               {
                 this.state.products.map((product) => {
                   return (
-                    <div key={product.index}>{product.productName}</div>
+                    <ProductItem key={product.index} {... product} />
                   );
                 })
               }

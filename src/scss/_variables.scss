@@ -1,2 +1,18 @@
-$background: #f9fdfc;
-$primary-light: #b0e0e6;
+$background:                      #f9fdfc;
+$primary-light:                   #b0e0e6;
+
+$catalog-header-bg:               $primary-light;
+
+$product-item-bg:                 #fff;
+$product-item-border:             1px solid #d0d0dc;
+$product-item-badge-color:        #fff;
+$product-item-badge-exclusive-bg: #209c40;
+$product-item-badge-sale-bg:      #dc2040;
+
+$breakpoints: (
+  xsmall: 0,
+  small:  400px,
+  medium: 700px,
+  large:  1000px,
+  xlarge: 1400px
+);

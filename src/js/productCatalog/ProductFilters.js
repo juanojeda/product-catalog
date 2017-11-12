@@ -28,9 +28,9 @@ class ProductFilters extends Component {
     const { filters } = this.props;
 
     return (
-      <div className='header__filters'>
-        <select onChange={this.setSelectedFilter} name='productFilters' id='productFilters'>
-          <option value=''>Filter by size</option>
+      <div className="catalog__filters">
+        <select onChange={this.setSelectedFilter} name="productFilters" id="productFilters">
+          <option value="">Filter by size</option>
           {
             /*TODO: Filter so that sizes come out ordered logically*/
             filters.map((filter) => {

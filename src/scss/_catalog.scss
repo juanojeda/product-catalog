@@ -1,0 +1,34 @@
+.catalog {
+  &__header {
+    align-items: center;
+    justify-content: space-between;
+    background: $catalog-header-bg;
+    display: flex;
+    margin-bottom: 1rem;
+    padding: .5rem  1rem;
+  }
+
+  &__header-text {
+    margin: 0;
+    padding: 0;
+  }
+
+  &__filters {
+    select {
+      padding: 1.5rem;
+    }
+  }
+
+  &__product-list {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  @include bp(medium){
+    &__filters {
+      select {
+        padding: initial;
+      }
+    }
+  }
+}

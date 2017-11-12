@@ -13,7 +13,7 @@ if (root) {
   ReactDOM.render(
     <Provider store={StoreInstance}>
       <ProductCatalog
-        categoryTitle={'Women\'s tops'}
+        categoryTitle="Women's tops"
       />
     </Provider>,
     root

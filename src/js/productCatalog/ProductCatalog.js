@@ -3,7 +3,9 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
 import PropTypes from 'prop-types';
-import { assign, isEqual, filter, uniq, map, flatten } from 'lodash';
+import { assign, isEqual } from 'lodash';
+
+import { getFilters, getProductsBySize } from '../selectors/filterSelectors';
 
 import * as ProductActions from '../actions/ProductsActions';
 
@@ -15,86 +17,61 @@ class ProductCatalog extends Component {
     super(props);
 
     this.state = {
-      isLoading: true,
       selectedFilter: null,
-      filters: [],
-      products: []
+      products: [],
+      filters: []
     };
-
-    this.setSelectedFilterSize = this.setSelectedFilterSize.bind(this);
   }
+
 
   componentWillMount() {
     const { actions } = this.props;
 
+    // trigger fetch of products. This won't directly
+    // populate the products, but will be caught by the
+    // componentWillUpdate step, to handle
     actions.fetchProducts();
-
   }
 
   componentWillUpdate(nextProps, nextState) {
 
-    const isProductsLoaded = !isEqual(this.props.productsState, nextProps.productsState);
-    const isFilterUpdated = !isEqual(this.state.selectedFilter, nextState.selectedFilter);
+    const isProductsOutOfSync = (nextProps.productsFeed.products.length && !this.state.products.length);
+    const isSelectedFilterOutOfSync = !isEqual(nextState.selectedFilter, this.state.selectedFilter);
 
-    if (isProductsLoaded || isFilterUpdated){
+    // if a filter has been selected, get the filtered products
+    if (isProductsOutOfSync || isSelectedFilterOutOfSync){
       this.setState({
-        isLoading: nextProps.productsState.isLoading,
-        filters: this.getFiltersFromProductsFeed(nextProps.productsState.products),
-        products: this.getProductsBySize(nextProps.productsState.products, nextState.selectedFilter)
+        products: nextProps.filteredProducts(nextState.selectedFilter)
       });
     }
   }
 
-  getProductsBySize(products, size) {
-    let filteredProducts = [...products];
 
-    if(size !== null) {
-      filteredProducts = filter(products, (product) => {
-        return product.size.indexOf(size) !== -1;
-      });
-    }
-
-    return filteredProducts;
-  }
-
-  getFiltersFromProductsFeed(products){
-    const filters = uniq(flatten(map(products, 'size')));
-
-    return filters;
-  }
-
-  setSelectedFilterSize(size) {
-    this.setState({
-      selectedFilter: size
-    });
-  }
 
   render() {
+
     const {categoryTitle} = this.props;
+    const { products, filters } = this.state;
 
     return (
-      <div className='catalog container'>
+      <div className="catalog container">
 
-        <div className='catalog__header'>
+        <div className="catalog__header">
           <h2>{categoryTitle}</h2>
 
-          <ProductFilters onChangeHandler={this.setSelectedFilterSize} filters={this.state.filters} />
+          <ProductFilters filters={filters} />
         </div>
 
-        {
-          this.state.isLoading ?
-            <div className='loading'>Loading ...</div>
-          :
-            <div className='catalog__product-list'>
-              {
-                this.state.products.map((product) => {
-                  return (
-                    <div key={product.index}>{product.productName}</div>
-                  );
-                })
-              }
-            </div>
-        }
+        <div className="catalog__product-list">
+          {
+            products.map((product) => {
+              return (
+                <div>{product}</div>
+              );
+            })
+          }
+        </div>
+
       </div>
     );
   }
@@ -106,7 +83,9 @@ ProductCatalog.propTypes = {
 
 function mapStateToProps (state) {
   return {
-    productsState: state.ProductsReducer
+    productsFeed: state.ProductsReducer,
+    filters: getFilters(state),
+    filteredProducts: (size) => { return getProductsBySize(size)(state); }
   };
 }
 
